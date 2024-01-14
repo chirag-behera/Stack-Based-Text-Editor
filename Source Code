@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX_TEXT_LENGTH 1000
+#define MAX_STACK_SIZE 100
+// Define a structure to represent the stack
+typedef struct {
+    char data[MAX_TEXT_LENGTH];
+} TextBlock;
+typedef struct {
+ TextBlock stack[MAX_STACK_SIZE];
+ int top;
+} TextEditorStack;
+// Function to initialize the stack
+void initStack(TextEditorStack* stack) {
+ stack->top = -1;
+}
+// Function to push a text block onto the stack
+void push(TextEditorStack* stack, const char* text) {
+ if (stack->top < MAX_STACK_SIZE - 1) {
+ strcpy(stack->stack[++stack->top].data, text);
+ } else {
+ printf("Stack is full. Cannot push more text.\n");
+ }
+}
+// Function to pop the top text block from the stack
+void pop(TextEditorStack* stack, char* text) {
+ if (stack->top >= 0) {
+ strcpy(text, stack->stack[stack->top].data);
+ stack->top--;
+ } else {
+ printf("Stack is empty. Nothing to pop.\n");
+ text[0] = '\0';
+ }
+}
+// Function to display the current text
+void displayText(const char* text) {
+ printf("Current Text:\n%s\n", text);
+}
+int main() {
+ TextEditorStack undoStack, redoStack;
+ initStack(&undoStack);
+ initStack(&redoStack);
+ char input[MAX_TEXT_LENGTH];
+ char currentText[MAX_TEXT_LENGTH];
+ char poppedText[MAX_TEXT_LENGTH];
+ currentText[0] = '\0';
+ while (1) {
+ printf("Menu:\n");
+ printf("1. Push Text\n");
+ printf("2. Pop Text\n");
+ printf("3. Update Text\n");
+ printf("4. Undo\n");
+ printf("5. Redo\n");
+ printf("6. Exit\n");
+ int choice;
+ scanf("%d", &choice);
+ getchar(); // Consume the newline character
+ switch (choice) {
+ case 1:
+ printf("Enter text to push: ");
+ fgets(input, sizeof(input), stdin);
+ input[strlen(input) - 1] = '\0'; // Remove the 
+ push(&undoStack, currentText);
+ strcpy(currentText, input);
+ break;
+ case 2:
+ pop(&undoStack, poppedText);
+ strcpy(currentText, poppedText);
+ displayText(currentText);
+ break;
+ case 3:
+ printf("Enter new text: ");
+ fgets(input, sizeof(input), stdin);
+ input[strlen(input) - 1] = '\0'; // Remove the 
+ push(&undoStack, currentText);
+ strcpy(currentText, input);
+ break;
+ case 4:
+ push(&redoStack, currentText);
+ pop(&undoStack, poppedText);
+ strcpy(currentText, poppedText);
+ displayText(currentText);
+ break;
+ case 5:
+ pop(&redoStack, poppedText);
+ strcpy(currentText, poppedText);
+ displayText(currentText);
+ break;
+ case 6:
+ // Clean up and exit
+ return 0;
+ default:
+ printf("Invalid choice. Try again.\n");
+ break;
+ }
+ }
+ return 0;
+}
